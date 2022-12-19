@@ -30,14 +30,14 @@ pub async fn run_server() {
     let port : u16 = std::env::var("SERVER_PORT").expect("SERVER_PORT must be set.").parse().expect("SERVER_PORT must be a number.");
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
-    let cors = CorsLayer::new()
-        .allow_methods(Any)
-        .allow_origin(Any)
-        .allow_headers(Any);
     // let cors = CorsLayer::new()
-    //     .allow_methods([Method::GET, Method::POST])
-    //     .allow_origin([std::env::var("DOMAIN").expect("DOMAIN must be set.").parse().unwrap()])
-    //     .allow_headers([AUTHORIZATION]);
+    //     .allow_methods(Any)
+    //     .allow_origin(Any)
+    //     .allow_headers(Any);
+    let cors = CorsLayer::new()
+        .allow_methods([Method::GET, Method::POST])
+        .allow_origin([std::env::var("DOMAIN").expect("DOMAIN must be set.").parse().unwrap()])
+        .allow_headers([AUTHORIZATION]);
 
     let app = Router::new()
         .route("/content", get(content))
