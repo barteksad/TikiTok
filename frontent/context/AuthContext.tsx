@@ -18,17 +18,18 @@ export const AuthContextProvider = ({
 }) => {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  console.log(user)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log(user?.getIdToken());
       if (user) {
-        setUser({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-        })
+        user.getIdToken().then((iDToken) => {
+          setUser({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            idToken: iDToken
+          })
+        });
       } else {
         setUser(null)
       }

@@ -14,7 +14,7 @@ use dotenv::dotenv;
 use reqwest::header::AUTHORIZATION;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
-use tower_http::cors::{CorsLayer, Any};
+use tower_http::cors::CorsLayer;
 use axum::http::Method;
 
 use crate::{auth::{AuthError, authorize}, video::{get_videos, VideosError, Videos}};
