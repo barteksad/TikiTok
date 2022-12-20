@@ -18,3 +18,14 @@ services:
     depends_on:
       database:
         condition: service_healthy
+  context_mixer:
+    build: ./context_mixer
+    ports:
+      - "3001:3001"
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      context_mixer:
+        condition: service_started
