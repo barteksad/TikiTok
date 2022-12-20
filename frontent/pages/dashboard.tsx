@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import useSWR from 'swr'
 import { useAuth } from '../context/AuthContext';
 
