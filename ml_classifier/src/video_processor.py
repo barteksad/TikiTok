@@ -10,8 +10,8 @@ import torchvision
 from torch.nn.functional import log_softmax
 import torchvision.transforms as transforms
 import torch
-import transforms as T
-from movinets import MoViNet
+from movinets import transforms as T
+from movinets.models import MoViNet
 from movinets.config import _C
 
 MAX_FPS = 5  # MoViNet-A0 should be given inputs with 5 frames per second (FPS).
