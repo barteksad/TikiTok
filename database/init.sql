@@ -15,7 +15,9 @@ CREATE TABLE video
     CHECK ((time_processed IS NULL AND status = 'WAITING' AND class IS NULL)
         OR (time_processed IS NOT NULL AND status = 'PROCESSED' AND class BETWEEN 0 AND 599)
         OR (time_processed IS NOT NULL AND status = 'INVALID')
-    )
+    ),
+
+    CHECK (likes_count >= 0)
 );
 
 CREATE INDEX idx_videos_lookup ON video (class, time_processed);
