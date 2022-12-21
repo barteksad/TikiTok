@@ -56,7 +56,6 @@ def process_video(video_id: str, raw_video_content: bytes) -> np.array:
     # Save the video to a temp file
     # to easily read it with torchvision.
     # TODO: check how to do it without saving to file.
-    print('PROCESSING')
     with tempfile.NamedTemporaryFile() as fp, torch.no_grad():
         fp.write(raw_video_content)
 
