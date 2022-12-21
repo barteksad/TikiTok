@@ -9,6 +9,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  processing_queue:
+    image: "rabbitmq:3.7-management-alpine"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "pass"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 5s
+      timeout: 5s
+      retries: 5
   video_uploader:
     env_file:
       - docker.env
@@ -18,14 +31,17 @@ services:
     depends_on:
       database:
         condition: service_healthy
-  context_mixer:
-    build: ./context_mixer
-    ports:
-      - "3001:3001"
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      context_mixer:
-        condition: service_started
+      processing_queue:
+        condition: service_healthy
+
+#  context_mixer:
+#    build: ./context_mixer
+#    ports:
+#      - "3001:3001"
+#  frontend:
+#    build: ./frontent
+#    ports:
+#      - "3000:3000"
+#    depends_on:
+#      context_mixer:
+#        condition: service_started

@@ -35,11 +35,18 @@ def upload_video_from_file(video_id: int, video: File) -> requests.Response:
     :return: response e.g. {"success":true,"message":"OK","statusCode":200}
     """
     url = f'{URL}/{video_id}'
-
     headers = {
         "accept": "application/json",
         "content-type": "application/octet-stream",
         "AccessKey": API_KEY
     }
-
     return requests.put(url, data=video, headers=headers)
+
+
+def delete_video(video_id: int):
+    url = f'{URL}/{video_id}'
+    headers = {
+        "accept": "application/json",
+        "AccessKey": API_KEY
+    }
+    return requests.delete(url, headers=headers)
