@@ -1,3 +1,4 @@
+import pika
 from fastapi import FastAPI, Response, File
 import logging
 
@@ -20,8 +21,8 @@ postgres = postgres_conn.cursor()
 
 rabbitmq_conn = job_queue.connect()
 rabbitmq = rabbitmq_conn.channel()
-rabbitmq.queue_declare(queue='classifier_jobs')
-
+# rabbitmq.queue_declare(queue='classifier_jobs', durable=True)
+rabbitmq.queue_declare(queue='classifier_jobs', durable=True)
 
 @app.post("/upload/{title}")
 def upload(response: Response, title: str, file: bytes = File()):
@@ -46,10 +47,16 @@ def upload(response: Response, title: str, file: bytes = File()):
         postgres.execute(r'INSERT INTO video(id, title) VALUES (%s, %s);', (video_id, title))
         logger.info(f"Created a record for video's {video_id} metadata.")
 
-        rabbitmq.basic_publish(exchange='', routing_key='classifier_jobs', body=f'{video_id}')
         logger.info(f"Pushed video ID {video_id} to the processing queue.")
 
         postgres_conn.commit()
+
+        rabbitmq.basic_publish(exchange='',
+                               routing_key='classifier_jobs',
+                               body=f'{video_id}',
+                               properties=pika.BasicProperties(
+                                   delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
+                               ))
     except Exception as error:
         postgres_conn.rollback()
         logger.error(error)

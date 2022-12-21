@@ -4,13 +4,10 @@
 #
 from typing import Dict
 
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import requests
 import tempfile
 import numpy as np
 import torchvision
-import torch.nn.functional as F
+from torch.nn.functional import log_softmax
 import torchvision.transforms as transforms
 import torch
 import transforms as T
@@ -23,18 +20,10 @@ TOP_K = 3
 MODEL = MoViNet(_C.MODEL.MoViNetA0, pretrained=True)
 MODEL.eval()
 
-BUNNY_CND_PULL_ZONE = "vz-80e5d374-0a6"
-VIDEO_ID = "6f37c274-4742-4953-b401-57b4ded16ebd"
-
 MODEL_PREPROCESS = transforms.Compose([
     T.ToFloatTensorInZeroOne(),
     T.Resize((200, 200)),
     T.CenterCrop((172, 172))])
-
-
-def download_video(video_id: int) -> requests.Response:
-    url = f"https://{BUNNY_CND_PULL_ZONE}.b-cdn.net/{video_id}/original"
-    return requests.get(url)
 
 
 def read_class_labels() -> np.array:
@@ -44,34 +33,32 @@ def read_class_labels() -> np.array:
     return np.array(labels_file.read().split('\n'))
 
 
-def reduce_fps(vid: torch.Tensor, vid_metadata: Dict) -> torch.Tensor:
+LABELS = read_class_labels()
+
+
+def reduce_fps(video: torch.Tensor, metadata: Dict) -> torch.Tensor:
     """
         Selects frames to reduce video's FPS to at most MAX_FPS.
         Returns selected frames of the video.
     """
-    fps = int(vid_metadata['video_fps'])
-    frames_cnt = vid.size()[0]
+    fps = int(metadata['video_fps'])
+    frames_cnt = video.size()[0]
 
     selected_frames_cnt = min(frames_cnt, frames_cnt * MAX_FPS // fps)
     selected_frames = torch.linspace(start=0,
                                      end=frames_cnt - 1,
                                      steps=selected_frames_cnt,
                                      dtype=torch.long)
-    return vid[selected_frames]
+    return video[selected_frames]
 
 
-
-try:
-    labels = read_class_labels()
-
-    # Download the video from CDN.
-    x = download_video(VIDEO_ID)
-    print(x)
-
-    # Save the downloaded video to a temp file
+def process_video(video_id: str, raw_video_content: bytes) -> np.array:
+    # Save the video to a temp file
     # to easily read it with torchvision.
+    # TODO: check how to do it without saving to file.
+    print('PROCESSING')
     with tempfile.NamedTemporaryFile() as fp, torch.no_grad():
-        fp.write(x.content)
+        fp.write(raw_video_content)
 
         video, _, metadata = torchvision.io.read_video(fp.name)
         # video has shape (frames, height, width, colors)
@@ -79,17 +66,10 @@ try:
         video = reduce_fps(video, metadata)
         video = MODEL_PREPROCESS(video)
 
-        #
-        # fig, ax = plt.subplots()
-        # frames = [[ax.imshow(video[0][i])] for i in range(video.size()[1])]
-        #
-        # ani = animation.ArtistAnimation(fig, frames, interval=200, blit=True, repeat_delay=1000)
-        #
-        # plt.show()
-
         video_batch = torch.unsqueeze(video, 0)
-        output = F.log_softmax(MODEL(video_batch), dim=1)
+        output = log_softmax(MODEL(video_batch), dim=1)
         _, predicted_classes = torch.topk(output, dim=1, k=TOP_K)
-        print(f"Video {VIDEO_ID} predictions: {labels[predicted_classes]}")
-except Exception as e:
-    print(e)
+
+        print(f"Video {video_id} predictions: {LABELS[predicted_classes]}")
+        return predicted_classes[0]
+

@@ -33,7 +33,15 @@ services:
         condition: service_healthy
       processing_queue:
         condition: service_healthy
-
+  ml_classifier:
+    env_file:
+      - docker.env
+    build: ./ml_classifier
+    depends_on:
+      database:
+        condition: service_healthy
+      processing_queue:
+        condition: service_healthy
 #  context_mixer:
 #    build: ./context_mixer
 #    ports:
