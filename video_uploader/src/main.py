@@ -8,9 +8,9 @@ import src.job_queue as job_queue
 # Logging
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
-requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.INFO)
-requests_log.propagate = True
+logger = logging.getLogger("requests.packages.urllib3")
+logger.setLevel(logging.INFO)
+logger.propagate = True
 
 app = FastAPI()
 
@@ -25,13 +25,15 @@ rabbitmq.queue_declare(queue='classifier_jobs')
 
 @app.post("/upload/{title}")
 def upload(response: Response, title: str, file: bytes = File()):
+    """Uploads video with title `title` from `file` to BunnyCDN."""
+
     resp1 = cdn.create_video(title)
     response.body = resp1.json()
     response.status_code = resp1.status_code
     if resp1.status_code != 200:
         return
     video_id = resp1.json()['guid']
-    requests_log.info(f'Created a video object: \n {resp1.json()}')
+    logger.info(f'Created a video object: \n {resp1.json()}')
 
     try:
         resp2 = cdn.upload_video_from_file(video_id, file)
@@ -39,18 +41,18 @@ def upload(response: Response, title: str, file: bytes = File()):
         response.status_code = resp2.status_code
         if resp2.status_code != 200:
             raise IOError(f'Failed to upload contents of video {video_id} to CDN.')
-        requests_log.info(f'Uploaded the video: \n {resp2.json()}')
+        logger.info(f'Uploaded the video: \n {resp2.json()}')
 
         postgres.execute(r'INSERT INTO video(id, title) VALUES (%s, %s);', (video_id, title))
-        requests_log.info(f"Created a record for video's {video_id} metadata.")
+        logger.info(f"Created a record for video's {video_id} metadata.")
 
         rabbitmq.basic_publish(exchange='', routing_key='classifier_jobs', body=f'{video_id}')
-        requests_log.info(f"Pushed video ID {video_id} to the processing queue.")
+        logger.info(f"Pushed video ID {video_id} to the processing queue.")
 
         postgres_conn.commit()
     except Exception as error:
         postgres_conn.rollback()
-        requests_log.error(error)
+        logger.error(error)
         response.status_code = 500
         cdn.delete_video(video_id)
 
