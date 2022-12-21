@@ -1,7 +1,4 @@
-# !pip install av
-# ! wget https://raw.githubusercontent.com/pytorch/vision/6de158c473b83cf43344a0651d7c01128c7850e6/references/video_classification/transforms.py
-# ! pip install git+https://github.com/Atze00/MoViNet-pytorch.git
-#
+
 from typing import Dict
 
 import tempfile

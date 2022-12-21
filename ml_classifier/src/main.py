@@ -15,6 +15,7 @@ rabbitmq = rabbitmq_conn.channel()
 def process_video(video_id: str):
     # Download the video from CDN.
     # TODO: get video object and check it's status (e.g. bunnyCDN encoding failed)
+    # TODO: if video is OK, but not ready for download yet, sleep and try again later.
     response = cdn.download_video(video_id)
     if response.status_code != 200:
         cdn.delete_video(video_id)

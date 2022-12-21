@@ -608,7 +608,7 @@ class MoViNet(nn.Module):
                     raise ValueError("Only A0,A1,A2 streaming" +
                                      "networks are available pretrained")
                 state_dict = (torch.hub
-                              .load_state_dict_from_url(cfg.stream_weights, model_dir=".."))
+                              .load_state_dict_from_url(cfg.stream_weights))
             else:
                 state_dict = torch.hub.load_state_dict_from_url(cfg.weights)
             self.load_state_dict(state_dict)
