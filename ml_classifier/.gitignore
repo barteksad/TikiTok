@@ -1,0 +1,6 @@
+.env
+*.log
+test_train_splits/*
+test_train_splits_sample/*
+video_data/*
+video_data_sample/*
