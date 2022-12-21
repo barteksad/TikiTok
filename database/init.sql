@@ -9,15 +9,31 @@ CREATE TABLE video
     title          VARCHAR(255) NOT NULL,
     likes_count    INTEGER      NOT NULL DEFAULT 0,
     status         VARCHAR(16)  NOT NULL DEFAULT 'WAITING',
-    class          SMALLINT,
+    class1         SMALLINT,
+    class2         SMALLINT,
+    class3         SMALLINT,
     time_processed TIMESTAMP,
 
-    CHECK ((time_processed IS NULL AND status = 'WAITING' AND class IS NULL)
-        OR (time_processed IS NOT NULL AND status = 'PROCESSED' AND class BETWEEN 0 AND 599)
-        OR (time_processed IS NOT NULL AND status = 'INVALID' AND class IS NULL)
+    CHECK ((time_processed IS NULL
+                AND status = 'WAITING'
+                AND class1 IS NULL
+                AND class2 IS NULL
+                AND class3 IS NULL)
+        OR (time_processed IS NOT NULL
+                AND status = 'INVALID'
+                AND class1 IS NULL
+                AND class2 IS NULL
+                AND class3 IS NULL)
+        OR (time_processed IS NOT NULL
+                AND status = 'PROCESSED'
+                AND class1 BETWEEN 0 AND 599
+                AND class2 BETWEEN 0 AND 599
+                AND class3 BETWEEN 0 AND 599)
     ),
 
     CHECK (likes_count >= 0)
 );
 
-CREATE INDEX idx_videos_lookup ON video (class, time_processed);
+CREATE INDEX idx_videos_lookup1 ON video (class1, time_processed);
+CREATE INDEX idx_videos_lookup2 ON video (class2, time_processed);
+CREATE INDEX idx_videos_lookup3 ON video (class3, time_processed);
