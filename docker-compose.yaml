@@ -42,14 +42,16 @@ services:
         condition: service_healthy
       processing_queue:
         condition: service_healthy
-#  context_mixer:
-#    build: ./context_mixer
-#    ports:
-#      - "3001:3001"
-#  frontend:
-#    build: ./frontent
-#    ports:
-#      - "3000:3000"
-#    depends_on:
-#      context_mixer:
-#        condition: service_started
+  context_mixer:
+    env_file:
+      - docker.env
+    build: ./context_mixer
+    ports:
+      - "3001:3001"
+  frontend:
+    build: ./frontent
+    ports:
+      - "3000:3000"
+    depends_on:
+      context_mixer:
+        condition: service_started
