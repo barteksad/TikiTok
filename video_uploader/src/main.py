@@ -1,10 +1,16 @@
 import pika
 from fastapi import FastAPI, Response, File
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 import src.bunny_cdn as cdn
 import src.db as db
 import src.job_queue as job_queue
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Logging
 logging.basicConfig()
@@ -14,6 +20,16 @@ logger.setLevel(logging.INFO)
 logger.propagate = True
 
 app = FastAPI()
+
+# CORS setup
+origins = [os.environ["DOMAIN"]]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 postgres_conn = db.connect()
 postgres_conn.autocommit = False
