@@ -24,13 +24,9 @@ const Dashboard = () => {
 
       <div>
         {data ?
-          data.ids.map((id) => <div key={id}>{id}</div>)
+          data.ids.map((id) => <Video key={id} id={id}></Video>)
           : 'loading..'}
       </div>
-      <div>
-          <Video id="b1a04e66-c701-4e65-b8bf-01996a3f182f"></Video>
-          <Video id="b1a04e66-c701-4e65-b8bf-01996a3f182f"></Video>
-        </div>
     </div>
   )
 }

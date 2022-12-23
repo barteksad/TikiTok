@@ -1,5 +1,5 @@
 
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::Arc};
 
 use axum::{
     async_trait,
@@ -10,6 +10,7 @@ use axum::{
     routing::get,
     Json, RequestPartsExt, Router,
 };
+use axum_macros::debug_handler;
 use dotenv::dotenv;
 use reqwest::header::AUTHORIZATION;
 use serde::{Serialize, Deserialize};
@@ -17,7 +18,7 @@ use serde_json::json;
 use tower_http::cors::CorsLayer;
 use axum::http::Method;
 
-use crate::{auth::{AuthError, authorize}, video::{get_videos, VideosError, Videos}};
+use crate::{auth::{AuthError, authorize}, video::{VideosError, Videos, StrategyLatest, get_videos, Strategy}};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -50,8 +51,10 @@ pub async fn run_server() {
         .unwrap();
 }
 
+#[debug_handler]
 async fn content(claims: Claims) -> Result<Json<Videos>, VideosError> {
-    let videos = get_videos(claims).await?;
+    let strategy: Arc<dyn Strategy> = Arc::new(StrategyLatest { n_latest: 10 });
+    let videos = get_videos(&claims, strategy).await?;
 
     Ok(Json(videos))
 }
