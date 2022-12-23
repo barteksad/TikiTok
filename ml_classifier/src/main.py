@@ -17,6 +17,7 @@ def process_video(video_id: str):
     # TODO: get video object and check it's status (e.g. bunnyCDN encoding failed)
     # TODO: if video is OK, but not ready for download yet, sleep and try again later.
     response = cdn.download_video(video_id)
+    print(response.status_code)
     if response.status_code != 200:
         cdn.delete_video(video_id)
         postgres.execute(

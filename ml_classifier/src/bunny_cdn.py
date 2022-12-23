@@ -13,6 +13,7 @@ URL = f'https://video.bunnycdn.com/library/{VIDEO_LIB_ID}/videos'
 
 def download_video(video_id: str) -> requests.Response:
     url = f"https://{BUNNY_CND_PULL_ZONE}.b-cdn.net/{video_id}/original"
+    print(url)
     return requests.get(url)
 
 

@@ -14,7 +14,8 @@ def connect():
         rabbit_params = pika.ConnectionParameters(host=os.environ["RABBIT_MQ_HOST"],
                                                   port=int(os.environ["RABBIT_MQ_PORT"]),
                                                   virtual_host=os.environ["RABBIT_MQ_ROUTE"],
-                                                  credentials=rabbit_credentials)
+                                                  credentials=rabbit_credentials,
+                                                  heartbeat=0)
         return pika.BlockingConnection(rabbit_params)
     except Exception as error:
         print(error)

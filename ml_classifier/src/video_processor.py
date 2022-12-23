@@ -65,6 +65,7 @@ def process_video(video_id: str, raw_video_content: bytes) -> np.array:
         video_batch = torch.unsqueeze(video, 0)
         output = log_softmax(MODEL(video_batch), dim=1)
         _, predicted_classes = torch.topk(output, dim=1, k=TOP_K)
+        MODEL.clean_activation_buffers()
 
         print(f"Video {video_id} predictions: {LABELS[predicted_classes]}")
         return predicted_classes[0]
