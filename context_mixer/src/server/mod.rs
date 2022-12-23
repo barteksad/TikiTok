@@ -27,8 +27,7 @@ pub struct Claims {
 pub async fn run_server() {
     dotenv().ok();
 
-    let port : u16 = std::env::var("SERVER_PORT").expect("SERVER_PORT must be set.").parse().expect("SERVER_PORT must be a number.");
-    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    let addr: SocketAddr = SocketAddr::from(([0, 0, 0, 0], 3001));
 
     // let cors = CorsLayer::new()
     //     .allow_methods(Any)
@@ -70,7 +69,7 @@ where
             .await
             .map_err(|_| AuthError::InvalidToken)?;
         
-        authorize(bearer.token())
+        authorize(bearer.token()).await
     }
 }
 
