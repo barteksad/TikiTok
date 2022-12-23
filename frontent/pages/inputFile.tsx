@@ -19,7 +19,6 @@ const InputFile = () => {
             const resp = await fetch(`http://localhost:8001/upload/${title}`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "multipart/form-data",
                     "Authorization" : `Bearer ${user.idToken}`
                 },
                 body: formData,
