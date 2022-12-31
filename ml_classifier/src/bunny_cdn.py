@@ -12,10 +12,9 @@ URL = f'https://video.bunnycdn.com/library/{VIDEO_LIB_ID}/videos'
 
 
 def download_video(video_id: str) -> requests.Response:
-    url = f"https://{BUNNY_CND_PULL_ZONE}.b-cdn.net/{video_id}/original"
+    url = f"https://{BUNNY_CND_PULL_ZONE}.b-cdn.net/{video_id}/play_240p.mp4"
     print(url)
     return requests.get(url)
-
 
 def delete_video(video_id: str):
     url = f'{URL}/{video_id}'
@@ -27,11 +26,6 @@ def delete_video(video_id: str):
 
 
 def get_video_object(video_id: str) -> requests.Response:
-    """
-    Creates new video object in BunnyCDN.
-    :param title: title of the video.
-    :return: response e.g. {"success":true,"message":"OK","statusCode":200}
-    """
     url = f'{URL}/{video_id}'
     headers = {
         "accept": "application/json",

@@ -1,4 +1,4 @@
-FROM bitnami/pytorch
+FROM bitnami/pytorch:latest
 USER root
 WORKDIR /code
 

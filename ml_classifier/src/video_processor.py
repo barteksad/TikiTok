@@ -55,10 +55,8 @@ def process_video(video_id: str, raw_video_content: bytes) -> np.array:
     # TODO: check how to do it without saving to file.
     with tempfile.NamedTemporaryFile() as fp, torch.no_grad():
         fp.write(raw_video_content)
-
-        video, _, metadata = torchvision.io.read_video(fp.name)
+        video, _, metadata = torchvision.io.read_video(fp.name, pts_unit='sec', start_pts=0.0, end_pts=5.0)
         # video has shape (frames, height, width, colors)
-
         video = reduce_fps(video, metadata)
         video = MODEL_PREPROCESS(video)
 
