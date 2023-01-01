@@ -29,12 +29,13 @@ backoff = 4  # Time to wait on error.
 
 def process_video(video_id: str):
     # Download the video from CDN.
-    # TODO: get video object and check it's status (e.g. bunnyCDN encoding failed)
-    # TODO: if video is OK, but not ready for download yet, sleep and try again later.
     response = cdn.get_video_object(video_id)
+
+    if response.status_code != 200:
+        raise IOError(f'Getting video metadata failed: {response.status_code} {response.json()}')
+
     status = response.json()['status']
     print(response.json())
-    response = cdn.download_video(video_id)
     if status == VID_ERROR or status == VID_UPLOAD_FAILED:
         cdn.delete_video(video_id)
         postgres.execute(
@@ -51,6 +52,9 @@ def process_video(video_id: str):
           or status == VID_TRANSCODING):
         raise IOError("Latest video is not ready yet.")
     else:  # status == VID_FINISHED
+        response = cdn.download_video(video_id)
+        if response.status_code != 200:
+            raise IOError(f'Downloading video failed: {response.status_code} {response.json()}')
         raw_video_bytes = response.content
         classes = ML.process_video(video_id, raw_video_bytes)
 
