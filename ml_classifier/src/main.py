@@ -34,8 +34,8 @@ def process_video(video_id: str):
     if response.status_code != 200:
         raise IOError(f'Getting video metadata failed: {response.status_code} {response.json()}')
 
+    print(response)
     status = response.json()['status']
-    print(response.json())
     if status == VID_ERROR or status == VID_UPLOAD_FAILED:
         cdn.delete_video(video_id)
         postgres.execute(
@@ -53,6 +53,7 @@ def process_video(video_id: str):
         raise IOError("Latest video is not ready yet.")
     else:  # status == VID_FINISHED
         response = cdn.download_video(video_id)
+        print(response)
         if response.status_code != 200:
             raise IOError(f'Downloading video failed: {response.status_code} {response.json()}')
         raw_video_bytes = response.content
