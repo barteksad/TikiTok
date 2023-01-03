@@ -1,5 +1,9 @@
+from typing import Union, List
+
+import firebase_admin
+from firebase_admin import auth
 import pika
-from fastapi import FastAPI, Response, File
+from fastapi import FastAPI, Response, File, Header
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
@@ -21,6 +25,8 @@ logger.setLevel(logging.INFO)
 logger.propagate = True
 
 app = FastAPI()
+# GOOGLE_APPLICATION_CREDENTIALS env variable must be a path to firebase admin .json file.
+firebase = firebase_admin.initialize_app()
 
 # CORS setup
 origins = [os.environ["DOMAIN"]]
@@ -45,23 +51,44 @@ MAX_VIDEO_HEIGHT = 720
 MAX_VIDEO_WIDTH = 1280
 
 
-@app.post("/upload/{title}")
-def upload(response: Response, title: str, file: bytes = File()):
-    """Uploads video with title `title` from `file` to BunnyCDN."""
+def check_id_token(token: str):
+    token = token.removeprefix("Bearer ")
+    return auth.verify_id_token(token)
+
+
+def check_video(file: bytes):
     try:
         _, height, width, _ = iio.improps(file, plugin="pyav").shape
         metadata = iio.immeta(file, plugin="pyav")
     except Exception as error:
         logger.error(f"Cannot read video metadata: {error}")
-        response.status_code = 400
-        return {"message": "Invalid video format"}
+        raise AssertionError("Invalid video format.")
 
     if metadata["duration"] > MAX_VIDEO_LENGTH:
-        response.status_code = 400
-        return {"message": "Video is too long."}
+        raise AssertionError("Video is too long.")
     if height > MAX_VIDEO_HEIGHT or width > MAX_VIDEO_HEIGHT:
+        raise AssertionError("Video resolution is too large.")
+
+
+@app.post("/upload/{title}")
+def upload(response: Response, title: str, file: bytes = File(),
+           authorization: Union[str, None] = Header(default=None)):
+    """Uploads video with title `title` from `file` to BunnyCDN."""
+    try:
+        user = check_id_token(authorization)
+    except Exception as error:
+        logger.error(f"Cannot verify token {authorization}. Reason: {error}.")
+        response.status_code = 403
+        return {"message": f"Invalid ID token."}
+
+    logger.info(f"Successfully authorized user {user['user_id']} {user['email']}.")
+
+    try:
+        check_video(file)
+    except Exception as error:
+        logger.error(f"Cannot process video: {error}.")
         response.status_code = 400
-        return {"message": "Video resolution is too large."}
+        return {"message": error}
 
     resp1 = cdn.create_video(title)
     response.status_code = resp1.status_code

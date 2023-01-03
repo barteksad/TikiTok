@@ -11,4 +11,6 @@ RUN pip install -r requirements.txt
 
 COPY . /code
 
+ENV GOOGLE_APPLICATION_CREDENTIALS="firebase-admin.json"
+
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
