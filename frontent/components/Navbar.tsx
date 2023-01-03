@@ -3,12 +3,15 @@ import { Container, Nav, Navbar } from 'react-bootstrap'
 import Link from 'next/link'
 import { useAuth } from '../context/AuthContext'
 import { useRouter } from 'next/router'
+import styles from "../styles/Navbar.module.css";
 
 const NavbarComp = () => {
   const { user, logout } = useAuth()
   const router = useRouter()
 
   return (
+    <div className={styles.div}>
+
     <Navbar bg="light" expand="lg">
       <Container>
         <Link href="/" passHref>
@@ -48,6 +51,7 @@ const NavbarComp = () => {
         </Navbar.Collapse>
       </Container>
     </Navbar>
+    </div>
   )
 }
 

@@ -2,6 +2,7 @@ import React from 'react'
 import useSWR from 'swr'
 import { useAuth } from '../context/AuthContext';
 import Video from './videos/[id]';
+import styles from "../styles/Dashboard.module.css";
 
 const content_fetcher = (token: String) => {
   return fetch("http://localhost:3001/content", { method: "GET", headers: { "Authorization": `Bearer ${token}` } }).then((res) => res.json());
@@ -20,14 +21,13 @@ const Dashboard = () => {
   if (data) console.debug(data);
 
   return (
-    <div>
-
-      <div>
+      <div className={styles.container}>
         {data ?
-          data.ids.map((id) => <Video key={id} id={id}></Video>)
+          data.ids.map((id) => <div key={id} className={styles.child}>
+            <Video id={id} ></Video>
+          </div>)
           : 'loading..'}
       </div>
-    </div>
   )
 }
 

@@ -5,7 +5,7 @@ type Props = {
 }
 
 const Video = ({ id }: Props) => {
-    const url = `https://iframe.mediadelivery.net/embed/83596/${id}?autoplay=true`;
+    const url = `https://iframe.mediadelivery.net/embed/83596/${id}?autoplay=true&loop=true`;
 
     return (
         <div className={styles.div}>
