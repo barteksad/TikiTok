@@ -87,7 +87,7 @@ impl Strategy for StrategyLatest {
     ) -> Result<Videos, VideosError> {
         let rows = client
             .query(
-                "SELECT id FROM video WHERE status = $1 ORDER BY time_processed DESC LIMIT 5",
+                "SELECT id FROM video WHERE status = $1 ORDER BY time_processed DESC LIMIT $2",
                 &[&"PROCESSED", &self.n_latest],
             )
             .await
