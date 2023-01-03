@@ -12,13 +12,19 @@ const NavbarComp = () => {
     <Navbar bg="light" expand="lg">
       <Container>
         <Link href="/" passHref>
-          <Navbar.Brand>NextJS Firebase Auth</Navbar.Brand>
+          <Navbar.Brand>Tiki-Tok</Navbar.Brand>
         </Link>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             {user ? (
-              // <div>
+              <>
+                <Nav.Item>
+                  <Nav.Link href="/dashboard">Dashboard</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link href="/inputFile">Upload video</Nav.Link>
+                </Nav.Item>
                 <Nav.Link
                   onClick={() => {
                     logout()
@@ -27,7 +33,7 @@ const NavbarComp = () => {
                 >
                   Logout
                 </Nav.Link>
-              // </div>
+              </>
             ) : (
               <>
                 <Nav.Item>

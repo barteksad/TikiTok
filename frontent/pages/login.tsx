@@ -11,6 +11,10 @@ const Login = () => {
     password: '',
   })
 
+  if (user) {
+    router.push('/dashboard')
+  }
+
   const handleLogin = async (e: any) => {
     e.preventDefault()
 
