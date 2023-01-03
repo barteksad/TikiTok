@@ -73,6 +73,9 @@ impl Strategy for StrategyConstant {
             Uuid::from_str("942e76c8-a62a-4228-8fbf-a0fe49d65c43").unwrap(),
             Uuid::from_str("b1a04e66-c701-4e65-b8bf-01996a3f182f").unwrap(),
             Uuid::from_str("18b3b2bd-8e6a-4c17-b8c7-2122eb132b30").unwrap(),
+            Uuid::from_str("b6c020cc-0e37-4ac7-bb61-a7595b93514f").unwrap(),
+            Uuid::from_str("29e8cf92-30e9-4466-8613-682e4fb15335").unwrap(),
+            Uuid::from_str("898080a0-5259-440b-9835-79858aa1c990").unwrap(),
         ];
         Ok(Videos { ids })
     }

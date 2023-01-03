@@ -18,7 +18,7 @@ use serde_json::json;
 use tower_http::cors::CorsLayer;
 use axum::http::Method;
 
-use crate::{auth::{AuthError, authorize}, video::{VideosError, Videos, StrategyLatest, get_videos, Strategy}};
+use crate::{auth::{AuthError, authorize}, video::{VideosError, Videos, StrategyLatest, get_videos, Strategy, StrategyConstant}};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -53,7 +53,8 @@ pub async fn run_server() {
 
 #[debug_handler]
 async fn content(claims: Claims) -> Result<Json<Videos>, VideosError> {
-    let strategy: Arc<dyn Strategy> = Arc::new(StrategyLatest { n_latest: 10 });
+    // let strategy: Arc<dyn Strategy> = Arc::new(StrategyLatest { n_latest: 10 });
+    let strategy: Arc<dyn Strategy> = Arc::new(StrategyConstant);
     let videos = get_videos(&claims, strategy).await?;
 
     Ok(Json(videos))
