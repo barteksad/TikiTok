@@ -18,7 +18,7 @@ use serde_json::json;
 use tower_http::cors::CorsLayer;
 use axum::http::Method;
 
-use crate::{auth::{AuthError, authorize}, video::{VideosError, Videos, StrategyLatest, get_videos, Strategy, StrategyConstant}};
+use crate::{auth::{AuthError, authorize}, video::{VideosError, Videos, get_videos, Strategy, StrategyConstant}};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
