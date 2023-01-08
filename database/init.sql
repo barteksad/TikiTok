@@ -37,3 +37,17 @@ CREATE TABLE video
 CREATE INDEX idx_videos_lookup1 ON video (class1, time_processed);
 CREATE INDEX idx_videos_lookup2 ON video (class2, time_processed);
 CREATE INDEX idx_videos_lookup3 ON video (class3, time_processed);
+
+CREATE TABLE likes
+(
+    video_id   VARCHAR(50) NOT NULL,
+    FOREIGN KEY (video_id) REFERENCES video (id),
+    user_id    VARCHAR(50) NOT NULL,
+    CONSTRAINT likes_pk PRIMARY KEY (video_id, user_id)
+);
+
+CREATE TABLE preferences
+(
+    user_id    VARCHAR(50) PRIMARY KEY,
+    vector     REAL[600]  NOT NULL
+);

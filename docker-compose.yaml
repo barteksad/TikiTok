@@ -33,6 +33,15 @@ services:
         condition: service_healthy
       processing_queue:
         condition: service_healthy
+  like_handler:
+    env_file:
+      - docker.env
+    build: ./like_handler
+    ports:
+      - "8002:80"
+    depends_on:
+      database:
+        condition: service_healthy
   ml_classifier:
     env_file:
       - docker.env
