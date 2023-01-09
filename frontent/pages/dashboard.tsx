@@ -1,33 +1,20 @@
-import React from 'react'
-import useSWR from 'swr'
+import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext';
-import Video from './videos/[id]';
 import styles from "../styles/Dashboard.module.css";
-
-const content_fetcher = (token: String) => {
-  return fetch("http://localhost:3001/content", { method: "GET", headers: { "Authorization": `Bearer ${token}` } }).then((res) => res.json());
-}
+import VideosBatch from './videos/videosBatch';
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const { data, error } = useSWR<{
-    ids: Array<string>
-  }>(
-    user.idToken,
-    content_fetcher
-  );
+  const [nPart, setNPart] = useState(0);
 
-  if (error) console.debug(error);
-  if (data) console.debug(data);
+  const videos_batches = []
+  for(let i=0; i < nPart + 1; i++) {
+    videos_batches.push(<VideosBatch batch_id={i} is_last={i === nPart} new_limit= {() => setNPart(nPart + 1)} key={i}/>);
+  }
 
   return (
-      <div className={styles.container}>
-        {data ?
-          data.ids.map((id) => <div key={id} className={styles.child}>
-            <Video id={id} ></Video>
-          </div>)
-          : 'loading..'}
-      </div>
+    <div className={styles.container}>
+      {videos_batches}
+    </div>
   )
 }
 
