@@ -3,7 +3,7 @@ use std::{net::SocketAddr, sync::Arc};
 
 use axum::{
     async_trait,
-    extract::{FromRequestParts, TypedHeader},
+    extract::{FromRequestParts, TypedHeader, self},
     headers::{authorization::Bearer, Authorization},
     http::{request::Parts, StatusCode},
     response::{IntoResponse, Response},
@@ -18,11 +18,11 @@ use serde_json::json;
 use tower_http::cors::CorsLayer;
 use axum::http::Method;
 
-use crate::{auth::{AuthError, authorize}, video::{VideosError, Videos, get_videos, Strategy, StrategyConstant, StrategyLatest}};
+use crate::{auth::{AuthError, authorize}, video::{VideosError, Videos, get_videos, Strategy, StrategyMostLikedWithOthers}};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    user_id: String,
+    pub user_id: String,
 }
 
 pub async fn run_server() {
@@ -30,17 +30,13 @@ pub async fn run_server() {
 
     let addr: SocketAddr = SocketAddr::from(([0, 0, 0, 0], 3001));
 
-    // let cors = CorsLayer::new()
-    //     .allow_methods(Any)
-    //     .allow_origin(Any)
-    //     .allow_headers(Any);
     let cors = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST])
         .allow_origin([std::env::var("DOMAIN").expect("DOMAIN must be set.").parse().unwrap()])
         .allow_headers([AUTHORIZATION]);
 
     let app = Router::new()
-        .route("/content", get(content))
+        .route("/content/:n_part", get(content))
         .layer(cors);
 
     tracing::debug!("listening on {}", addr);
@@ -52,11 +48,13 @@ pub async fn run_server() {
 }
 
 #[debug_handler]
-async fn content(claims: Claims) -> Result<Json<Videos>, VideosError> {
-    let strategy: Arc<dyn Strategy> = Arc::new(StrategyLatest { n_latest: 1 });
+async fn content(extract::Path(batch_idx): extract::Path<usize>, claims: Claims) -> Result<Json<Videos>, VideosError> {
+    tracing::debug!("batch_idx: {}", batch_idx);
+    // let strategy: Arc<dyn Strategy> = Arc::new(StrategyLatest { n_latest: 1 });
     // let strategy: Arc<dyn Strategy> = Arc::new(StrategyConstant);
-    let videos = get_videos(&claims, strategy).await?;
-
+    let strategy: Arc<dyn Strategy> = Arc::new(StrategyMostLikedWithOthers::new());
+    let videos = get_videos(&claims, strategy, batch_idx).await?;
+    // let videos2 = Videos { ids: videos.ids.iter().cycle().take(n_part).cloned().collect() };
     Ok(Json(videos))
 }
 

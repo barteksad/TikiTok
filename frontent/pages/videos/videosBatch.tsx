@@ -29,12 +29,12 @@ const VideosBatch = ({ batch_id, is_last, new_limit }: Props) => {
 
     return (
         <div>
-        {data ?
+        {data && data.ids ?
             data.ids.map((id, idx) => <div key={idx} className={styles.child}>
                 <Video id={id} key={idx}></Video>
             </div>)
             : 'loading..'},
-        {(is_last && data && !isLoading) ?
+        {(is_last && data && data.ids && data.ids.length > 0 && !isLoading) ?
             <div className={styles.child}>
                 <Loading newLimit={new_limit} key={batch_id}></Loading>
             </div> : null}
