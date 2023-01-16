@@ -66,7 +66,7 @@ def check_video(file: bytes):
 
     if metadata["duration"] > MAX_VIDEO_LENGTH:
         raise AssertionError("Video is too long.")
-    if height > MAX_VIDEO_HEIGHT or width > MAX_VIDEO_HEIGHT:
+    if height > MAX_VIDEO_HEIGHT or width > MAX_VIDEO_WIDTH:
         raise AssertionError("Video resolution is too large.")
 
 
