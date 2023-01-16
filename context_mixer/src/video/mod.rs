@@ -2,7 +2,7 @@ use std::{env, str::FromStr, sync::Arc, collections::HashMap, sync::Mutex};
 
 use axum::async_trait;
 use serde::{Deserialize, Serialize};
-use tokio_postgres::{Config, types::{FromSql, Type}};
+use tokio_postgres::Config;
 use uuid::Uuid;
 
 use crate::server::Claims;
@@ -120,9 +120,7 @@ impl Strategy for StrategyMostLikedWithOthers {
             tracing::debug!("user_vec: {:?}", user_vec);
             let (c1, c2, c3) : (i16, i16, i16) = match user_vec {
                 Ok(rows_vec) if rows_vec.len() == 1 => {
-                    // let vec = Vec::<f32>::from_sql(&Type::FLOAT4_ARRAY, rows_vec.get(0).unwrap().get(0))
                     let vec: Vec<f32> = rows_vec.get(0).unwrap().get(0);
-                    // .unwrap(); // get vector from row
                     let mut vec = vec.iter()
                     .enumerate()
                     .collect::<Vec<(usize, &f32)>>(); // collect vector of tuples (index, value)
