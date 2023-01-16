@@ -1,3 +1,4 @@
+# docker compose up --scale context_mixer=2
 version: "3.9"
 services:
   database:
@@ -56,7 +57,7 @@ services:
       - docker.env
     build: ./context_mixer
     ports:
-      - "3001:3001"
+      - "3001"
   frontend:
     build: ./frontent
     ports:
@@ -64,3 +65,11 @@ services:
     depends_on:
       context_mixer:
         condition: service_started
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - context_mixer
+    ports:
+      - "3001:3001"
