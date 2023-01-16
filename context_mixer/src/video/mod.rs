@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::server::Claims;
 
 static VIDEOS_BATCH_SIZE: usize = 3;
-static N_BATCHES: usize = 3;
+static N_BATCHES: usize = 5;
 
 #[async_trait]
 pub trait Strategy: Send + Sync {
