@@ -40,7 +40,6 @@ app.add_middleware(
 
 postgres_conn = db.connect()
 postgres_conn.autocommit = False
-postgres = postgres_conn.cursor()
 
 rabbitmq_conn = job_queue.connect()
 rabbitmq = rabbitmq_conn.channel()
@@ -104,18 +103,19 @@ def upload(response: Response, title: str, file: bytes = File(),
             raise IOError(f'Failed to upload contents of video {video_id} to CDN: {resp2.json()}')
         logger.info(f'Uploaded the video: \n {resp2.json()}')
 
-        postgres.execute(r'INSERT INTO video(id, title) VALUES (%s, %s);', (video_id, title))
-        logger.info(f"Created a record for video's {video_id} metadata.")
+        with postgres_conn.cursor() as postgres:
+            postgres.execute(r'INSERT INTO video(id, title) VALUES (%s, %s);', (video_id, title))
+            logger.info(f"Created a record for video's {video_id} metadata.")
 
-        rabbitmq.basic_publish(exchange='',
-                               routing_key='classifier_jobs',
-                               body=f'{video_id}',
-                               properties=pika.BasicProperties(
-                                   delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
-                               ))
-        logger.info(f"Pushed video ID {video_id} to the processing queue.")
+            rabbitmq.basic_publish(exchange='',
+                                routing_key='classifier_jobs',
+                                body=f'{video_id}',
+                                properties=pika.BasicProperties(
+                                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
+                                ))
+            logger.info(f"Pushed video ID {video_id} to the processing queue.")
 
-        postgres_conn.commit()
+            postgres_conn.commit()
         return resp2.json()
     except Exception as error:
         postgres_conn.rollback()
