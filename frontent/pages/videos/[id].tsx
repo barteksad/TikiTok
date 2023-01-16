@@ -52,7 +52,7 @@ const Video = ({ id }: Props) => {
     setLike(!like);
   }
 
-  const url = `https://iframe.mediadelivery.net/embed/83596/${id}?autoplay=true&loop=true`;
+  const url = `https://iframe.mediadelivery.net/embed/88735/${id}?autoplay=true&loop=true`;
 
   return (
     <div className={styles.videoDiv}>
