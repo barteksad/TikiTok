@@ -41,6 +41,7 @@ async fn init_keys() -> Keys {
             (k, DecodingKey::from_rsa_pem(v.as_bytes()).unwrap())
         })
         .collect();
+    tracing::debug!("Got goole public keys");
     Keys { google_public_keys }
 }
 

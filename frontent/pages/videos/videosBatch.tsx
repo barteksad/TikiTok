@@ -36,7 +36,7 @@ const VideosBatch = ({ batch_id, is_last, new_limit }: Props) => {
             : 'loading..'},
         {(is_last && data && data.ids && data.ids.length > 0 && !isLoading) ?
             <div className={styles.child}>
-                <Loading newLimit={new_limit} key={batch_id}></Loading>
+                <Loading newLimit={new_limit} key={batch_id} isLoading={isLoading}></Loading>
             </div> : null}
         </div>
     )

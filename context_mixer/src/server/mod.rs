@@ -8,7 +8,7 @@ use axum::{
     http::{request::Parts, StatusCode},
     response::{IntoResponse, Response},
     routing::get,
-    Json, RequestPartsExt, Router,
+    Json, RequestPartsExt, Router, Extension,
 };
 use axum_macros::debug_handler;
 use dotenv::dotenv;
@@ -17,6 +17,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tower_http::cors::CorsLayer;
 use axum::http::Method;
+use tower_http::add_extension::AddExtensionLayer;
 
 use crate::{auth::{AuthError, authorize}, video::{VideosError, Videos, get_videos, Strategy, StrategyMostLikedWithOthers}};
 
@@ -36,7 +37,8 @@ pub async fn run_server() {
         .allow_headers([AUTHORIZATION]);
 
     let app = Router::new()
-        .route("/content/:n_part", get(content))
+    .route("/content/:n_part", get(content))
+    .layer(AddExtensionLayer::new(Arc::new(StrategyMostLikedWithOthers::new())))
         .layer(cors);
 
     tracing::debug!("listening on {}", addr);
@@ -48,13 +50,9 @@ pub async fn run_server() {
 }
 
 #[debug_handler]
-async fn content(extract::Path(batch_idx): extract::Path<usize>, claims: Claims) -> Result<Json<Videos>, VideosError> {
+async fn content(Extension(strategy): Extension<Arc<StrategyMostLikedWithOthers>>, extract::Path(batch_idx): extract::Path<usize>, claims: Claims) -> Result<Json<Videos>, VideosError> {
     tracing::debug!("batch_idx: {}", batch_idx);
-    // let strategy: Arc<dyn Strategy> = Arc::new(StrategyLatest { n_latest: 1 });
-    // let strategy: Arc<dyn Strategy> = Arc::new(StrategyConstant);
-    let strategy: Arc<dyn Strategy> = Arc::new(StrategyMostLikedWithOthers::new());
     let videos = get_videos(&claims, strategy, batch_idx).await?;
-    // let videos2 = Videos { ids: videos.ids.iter().cycle().take(n_part).cloned().collect() };
     Ok(Json(videos))
 }
 

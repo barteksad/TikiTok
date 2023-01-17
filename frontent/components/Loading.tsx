@@ -2,10 +2,12 @@ import { useEffect, useRef } from 'react';
 
 type Props = {
     newLimit: () => void;
+    isLoading: boolean;
   }
 
 export default function Loading({
-    newLimit
+    newLimit,
+    isLoading
 } : Props) {
     const loadingRef = useRef<HTMLDivElement>(null);
 
@@ -14,7 +16,7 @@ export default function Loading({
     
         const observer = new IntersectionObserver(([entry]) => {
           console.debug("Intersecting")
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && !isLoading) {
             console.debug(entry.intersectionRatio)
             console.debug("Setting new limit")
             newLimit();

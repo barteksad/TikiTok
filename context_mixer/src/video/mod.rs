@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::server::Claims;
 
 static VIDEOS_BATCH_SIZE: usize = 3;
-static N_BATCHES: usize = 5;
+static N_BATCHES: usize = 10;
 
 #[async_trait]
 pub trait Strategy: Send + Sync {
@@ -133,16 +133,16 @@ impl Strategy for StrategyMostLikedWithOthers {
                 _ => (308, 429, 315) // passing American football (in game), salsa dancing, 	petting cat
             };
             
-            let n_similar = (VIDEOS_BATCH_SIZE * N_BATCHES / 2) as i64;
-            let n_not_similar = (VIDEOS_BATCH_SIZE * N_BATCHES) as i64- n_similar;
+            let n_similar = (VIDEOS_BATCH_SIZE * N_BATCHES) as i64;
+            let n_not_similar = (VIDEOS_BATCH_SIZE * N_BATCHES) as i64;
             let similar_rows = client
                 .query(
                     "SELECT id FROM video WHERE status = $1 AND (class1 = $2 OR class2 = $3 OR class3 = $4) ORDER BY likes_count, time_processed DESC LIMIT $5 ;",
                     &[&"PROCESSED", &c1, &c2, &c3, &n_similar]).await;
             let not_similar_rows = client
                 .query(
-                    "SELECT id FROM video WHERE status = $1 AND (class1 != $2 AND class2 != $3 AND class3 != $4) ORDER BY likes_count, time_processed DESC LIMIT $5 ;",
-                    &[&"PROCESSED", &c1, &c2, &c3, &n_not_similar]).await;
+                    "SELECT id FROM video WHERE status = $1 ORDER BY likes_count, time_processed DESC LIMIT $2 ;",
+                    &[&"PROCESSED", &n_not_similar]).await;
             let video_ids_reversed: Vec<Uuid> = match (similar_rows, not_similar_rows) {
                 (Ok(similar_rows), Ok(not_similar_rows)) => {
                     let video_ids = similar_rows.iter().map(|row| Uuid::from_str(row.get(0)).unwrap()).rev().collect::<Vec<Uuid>>();
@@ -156,7 +156,9 @@ impl Strategy for StrategyMostLikedWithOthers {
             tracing::debug!("Inserting batch {:?} for user {:?}", video_ids_reversed, claims.user_id);
             self.batches.lock().unwrap().insert(claims.user_id.clone(), VideosBatch { video_ids_reversed });
         }
-        let resp = Ok(self.batches.lock().unwrap().get_mut(&claims.user_id).unwrap().next().unwrap());
+        let ids = self.batches.lock().unwrap().get_mut(&claims.user_id).unwrap().next().unwrap_or(Videos { ids: vec![] });
+        let resp = Ok(self.batches.lock().unwrap().get_mut(&claims.user_id).unwrap().next().unwrap_or(Videos { ids: vec![] }));
+        
         tracing::debug!("StrategyMostLikedWithOthers: {:?}", resp);
         resp
     }
