@@ -141,8 +141,8 @@ impl Strategy for StrategyMostLikedWithOthers {
                     &[&"PROCESSED", &c1, &c2, &c3, &n_similar]).await;
             let not_similar_rows = client
                 .query(
-                    "SELECT id FROM video WHERE status = $1 ORDER BY likes_count, time_processed DESC LIMIT $2 ;",
-                    &[&"PROCESSED", &n_not_similar]).await;
+                    "select id from video tablesample system (10) WHERE status = $1;",
+                    &[&"PROCESSED"]).await;
             let video_ids_reversed: Vec<Uuid> = match (similar_rows, not_similar_rows) {
                 (Ok(similar_rows), Ok(not_similar_rows)) => {
                     let video_ids = similar_rows.iter().map(|row| Uuid::from_str(row.get(0)).unwrap()).rev().collect::<Vec<Uuid>>();

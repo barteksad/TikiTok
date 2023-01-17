@@ -96,10 +96,12 @@ def handle_post_like(
             if not check_if_liked(video_id, user["user_id"], postgres):
                 factor = LIKE_CLASS_FACTOR
                 postgres.execute("""INSERT INTO likes (video_id, user_id) VALUES (%s, %s);""", (video_id, user["user_id"]))
+                postgres.execute("""UPDATE video SET likes_count = likes_count + 1 WHERE id = %s;""", (video_id,))
                 logger.info(f"User {user['user_id']} liked video {video_id}.")
             else:
                 factor = -LIKE_CLASS_FACTOR
                 postgres.execute("""DELETE FROM likes WHERE video_id = %s AND user_id = %s;""", (video_id, user["user_id"]))
+                postgres.execute("""UPDATE video SET likes_count = likes_count - 1 WHERE id = %s;""", (video_id,))
                 logger.info(f"User {user['user_id']} unliked video {video_id}.")
             logger.info(f"Successfully clicked like video {video_id} by user {user['user_id']}. Factor: {factor}.")
 

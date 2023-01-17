@@ -39,7 +39,7 @@ pub async fn run_server() {
     let app = Router::new()
     .route("/content/:n_part", get(content))
     .layer(AddExtensionLayer::new(Arc::new(StrategyMostLikedWithOthers::new())))
-        .layer(cors);
+    .layer(cors);
 
     tracing::debug!("listening on {}", addr);
 
